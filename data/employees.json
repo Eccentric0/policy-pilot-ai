@@ -1,0 +1,20 @@
+[
+  {
+    "employee_id": "E1001",
+    "name": "李明",
+    "department": "研发部",
+    "level": "P2",
+    "annual_leave_days": 10,
+    "used_leave_days": 4,
+    "remaining_leave_days": 6
+  },
+  {
+    "employee_id": "E1002",
+    "name": "王芳",
+    "department": "财务部",
+    "level": "P3",
+    "annual_leave_days": 5,
+    "used_leave_days": 1,
+    "remaining_leave_days": 4
+  }
+]

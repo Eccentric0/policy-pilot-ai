@@ -1,0 +1,16 @@
+[
+  {
+    "expense_id": "EXP1001",
+    "employee_id": "E1001",
+    "period": "2026-08",
+    "amount": 1280.0,
+    "status": "待直属主管审批"
+  },
+  {
+    "expense_id": "EXP1002",
+    "employee_id": "E1002",
+    "period": "2026-07",
+    "amount": 680.0,
+    "status": "已通过"
+  }
+]
