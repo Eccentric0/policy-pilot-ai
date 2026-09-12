@@ -7,189 +7,584 @@
   <title>星河 · 制度与报销助手</title>
   <style>
     :root {
-      --ink: #17211f;
-      --muted: #6b7774;
-      --line: #e4ebe8;
+      --ink: #17201f;
+      --ink-secondary: #42504d;
+      --muted: #70807c;
+      --line: #e3e9e7;
+      --line-strong: #d5dfdc;
       --paper: #ffffff;
-      --canvas: #f5f8f7;
+      --canvas: #f4f7f6;
+      --canvas-deep: #edf2f0;
       --accent: #0f766e;
-      --accent-dark: #0b5f59;
-      --accent-soft: #e5f4f0;
-      --warning: #a16207;
-      --warning-soft: #fff7df;
+      --accent-hover: #0b635d;
+      --accent-active: #084f4a;
+      --accent-soft: #e7f4f1;
+      --accent-soft-hover: #d9eee9;
+      --warning: #8a6108;
+      --warning-soft: #fff8e6;
       --danger: #b42318;
-      --danger-soft: #fff0ee;
-      --radius: 12px;
-      --shadow: 0 1px 3px rgba(23, 33, 31, .08);
+      --danger-soft: #fff2f0;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --shadow-float: 0 12px 32px rgba(23, 32, 31, .10);
+      --font: Inter, "SF Pro Text", "PingFang SC", "Microsoft YaHei", system-ui, -apple-system, sans-serif;
     }
 
     * { box-sizing: border-box; }
+    html { color-scheme: light; scroll-behavior: smooth; }
     body {
       margin: 0;
+      min-width: 320px;
       color: var(--ink);
       background: var(--canvas);
-      font-family: Inter, "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+      font-family: var(--font);
       font-size: 16px;
       line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
     }
     button, input, textarea { font: inherit; }
+    button, a { -webkit-tap-highlight-color: transparent; }
     button { cursor: pointer; }
-    button:focus-visible, input:focus-visible, textarea:focus-visible {
+    button:disabled { cursor: not-allowed; }
+    button:focus-visible, a:focus-visible, textarea:focus-visible {
       outline: 2px solid var(--accent);
-      outline-offset: 2px;
+      outline-offset: 3px;
     }
+    h1, h2, h3, p { margin: 0; }
+    svg { display: block; }
+    [hidden] { display: none !important; }
 
-    .shell { min-height: 100vh; display: grid; grid-template-rows: 64px 1fr; }
+    .skip-link {
+      position: fixed;
+      top: 8px;
+      left: 8px;
+      z-index: 100;
+      transform: translateY(-160%);
+      padding: 10px 16px;
+      border-radius: var(--radius-sm);
+      color: white;
+      background: var(--accent);
+      text-decoration: none;
+      transition: transform .18s ease;
+    }
+    .skip-link:focus { transform: translateY(0); }
+
+    .shell { min-height: 100vh; display: grid; grid-template-rows: 72px 1fr; }
     .topbar {
-      background: var(--paper);
-      border-bottom: 1px solid var(--line);
+      position: sticky;
+      top: 0;
+      z-index: 20;
       display: flex;
       align-items: center;
       justify-content: space-between;
+      min-width: 0;
       padding: 0 32px;
+      background: rgba(255, 255, 255, .96);
+      border-bottom: 1px solid var(--line);
+      backdrop-filter: blur(12px);
     }
-    .brand { display: flex; align-items: center; gap: 12px; }
+    .brand, .top-actions, .status-pill, .account-chip, .docs-link {
+      display: flex;
+      align-items: center;
+    }
+    .brand { min-width: 0; gap: 12px; }
     .brand-mark {
-      width: 32px; height: 32px; border-radius: 8px;
-      display: grid; place-items: center; color: white; background: var(--accent);
-      font-weight: 800; letter-spacing: -1px;
+      flex: 0 0 40px;
+      width: 40px;
+      height: 40px;
+      display: grid;
+      place-items: center;
+      border-radius: 10px;
+      color: white;
+      background: var(--accent);
+      font-size: 19px;
+      font-weight: 800;
+      letter-spacing: -.04em;
     }
-    .brand-name { font-size: 17px; font-weight: 700; letter-spacing: .01em; }
-    .brand-sub { color: var(--muted); font-size: 14px; margin-left: 8px; }
-    .top-actions { display: flex; align-items: center; gap: 16px; }
-    .status-pill, .tag {
-      display: inline-flex; align-items: center; gap: 8px;
-      min-height: 32px; padding: 4px 12px; border-radius: 999px;
-      font-size: 14px; font-weight: 600;
+    .brand-copy { min-width: 0; }
+    .brand-name { display: block; font-size: 16px; font-weight: 720; letter-spacing: -.01em; }
+    .brand-sub { display: block; margin-top: 1px; color: var(--muted); font-size: 12px; letter-spacing: .025em; }
+    .top-actions { gap: 8px; }
+    .status-pill {
+      gap: 8px;
+      min-height: 36px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      color: var(--ink-secondary);
+      background: var(--canvas);
+      font-size: 13px;
+      font-weight: 650;
     }
-    .status-pill { color: var(--accent-dark); background: var(--accent-soft); }
-    .status-dot { width: 8px; height: 8px; background: #21a179; border-radius: 50%; }
-    .docs-link { color: var(--accent); text-decoration: none; font-size: 14px; font-weight: 600; }
-    .docs-link:hover { text-decoration: underline; }
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #22a06b;
+      box-shadow: 0 0 0 3px rgba(34, 160, 107, .12);
+    }
+    .status-pill.error .status-dot { background: var(--danger); box-shadow: 0 0 0 3px rgba(180, 35, 24, .10); }
+    .account-chip {
+      gap: 8px;
+      min-height: 36px;
+      padding: 6px 12px 6px 6px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: var(--ink-secondary);
+      background: white;
+      font-size: 13px;
+      font-weight: 650;
+    }
+    .account-avatar {
+      width: 24px;
+      height: 24px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      color: var(--accent);
+      background: var(--accent-soft);
+      font-size: 11px;
+      font-weight: 800;
+    }
+    .docs-link {
+      gap: 8px;
+      min-height: 36px;
+      padding: 6px 12px;
+      border-radius: var(--radius-sm);
+      color: var(--ink-secondary);
+      font-size: 13px;
+      font-weight: 650;
+      text-decoration: none;
+      transition: color .16s ease, background-color .16s ease;
+    }
+    .docs-link:hover { color: var(--accent); background: var(--accent-soft); }
 
-    .layout { display: grid; grid-template-columns: 248px minmax(0, 1fr) 320px; gap: 24px; max-width: 1560px; width: 100%; margin: 0 auto; padding: 32px; }
-    .sidebar, .inspector { min-width: 0; }
-    .eyebrow { color: var(--accent); font-size: 13px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
-    h1, h2, h3, p { margin: 0; }
-    h1 { font-size: 32px; line-height: 1.25; letter-spacing: -.03em; }
-    h2 { font-size: 20px; line-height: 1.3; }
-    h3 { font-size: 16px; line-height: 1.4; }
-    .muted { color: var(--muted); }
-    .side-intro { padding: 8px 0 32px; }
-    .side-intro p { margin-top: 12px; font-size: 14px; color: var(--muted); }
-    .nav-card, .info-card, .panel, .message-card { background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); }
-    .nav-card { padding: 8px; }
-    .nav-item { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 8px; color: var(--muted); font-size: 14px; }
-    .nav-item.active { color: var(--accent-dark); background: var(--accent-soft); font-weight: 700; }
-    .nav-icon { width: 20px; text-align: center; font-size: 17px; }
-    .info-card { margin-top: 16px; padding: 16px; }
-    .info-card h3 { margin-bottom: 12px; }
-    .capability { display: flex; align-items: center; gap: 8px; margin-top: 10px; color: var(--muted); font-size: 14px; }
-    .capability::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+    .layout {
+      width: 100%;
+      max-width: 1600px;
+      margin: 0 auto;
+      padding: 32px;
+      display: grid;
+      grid-template-columns: 224px minmax(520px, 1fr) 304px;
+      gap: 24px;
+      align-items: start;
+    }
+    .sidebar, .inspector { min-width: 0; position: sticky; top: 104px; }
+    .sidebar { display: flex; flex-direction: column; gap: 32px; }
+    .side-intro { padding: 8px 8px 0; }
+    .eyebrow {
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+    .side-intro h2 { margin-top: 8px; font-size: 20px; line-height: 1.3; letter-spacing: -.02em; }
+    .side-intro p { margin-top: 12px; color: var(--muted); font-size: 14px; line-height: 1.65; }
+    .nav-group-label {
+      padding: 0 12px 8px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .08em;
+    }
+    .nav-card { display: grid; gap: 4px; }
+    .nav-item {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-height: 44px;
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 550;
+    }
+    .nav-item.active { color: var(--accent-active); background: var(--accent-soft); font-weight: 700; }
+    .nav-item.active::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 12px;
+      bottom: 12px;
+      width: 3px;
+      border-radius: 99px;
+      background: var(--accent);
+    }
+    .nav-icon { width: 20px; height: 20px; display: grid; place-items: center; }
+    .nav-icon svg { width: 18px; height: 18px; stroke-width: 1.8; }
+    .info-card {
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      background: rgba(255, 255, 255, .64);
+    }
+    .info-card h3 { font-size: 14px; font-weight: 750; }
+    .capability {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .capability::before {
+      content: "";
+      flex: 0 0 6px;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+    }
 
-    .workspace { min-width: 0; display: flex; flex-direction: column; gap: 24px; }
-    .hero { display: flex; justify-content: space-between; align-items: flex-end; gap: 24px; }
-    .hero-copy { display: grid; gap: 12px; }
-    .hero-copy p { color: var(--muted); max-width: 720px; }
-    .hero-meta { color: var(--muted); font-size: 14px; white-space: nowrap; }
-    .quick-prompts { display: flex; flex-wrap: wrap; gap: 8px; }
-    .quick-prompt { color: var(--accent-dark); background: var(--accent-soft); border: 0; border-radius: 999px; padding: 8px 12px; font-size: 14px; }
-    .quick-prompt:hover { background: #d4ece6; }
-    .conversation { display: flex; flex-direction: column; gap: 16px; min-height: 360px; }
+    .workspace { min-width: 0; }
+    .hero {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 24px;
+      padding: 8px 4px 24px;
+    }
+    .hero-copy { display: grid; gap: 8px; }
+    .hero h1 {
+      max-width: 760px;
+      font-size: clamp(28px, 2.3vw, 36px);
+      line-height: 1.22;
+      letter-spacing: -.035em;
+    }
+    .hero-copy p { max-width: 720px; color: var(--muted); font-size: 15px; }
+    .hero-badge {
+      flex: 0 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding-bottom: 2px;
+      color: var(--muted);
+      font-size: 13px;
+      white-space: nowrap;
+    }
+    .hero-badge svg { width: 16px; height: 16px; color: var(--accent); }
+
+    .chat-panel {
+      overflow: hidden;
+      min-height: calc(100vh - 168px);
+      display: flex;
+      flex-direction: column;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      background: var(--paper);
+    }
+    .prompt-section { padding: 20px 24px; border-bottom: 1px solid var(--line); }
+    .section-label { margin-bottom: 12px; color: var(--muted); font-size: 12px; font-weight: 750; letter-spacing: .06em; }
+    .quick-prompts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+    .quick-prompt {
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      color: var(--ink-secondary);
+      background: white;
+      font-size: 14px;
+      font-weight: 600;
+      text-align: left;
+      transition: border-color .16s ease, color .16s ease, background-color .16s ease;
+    }
+    .quick-prompt::after { content: "↗"; color: #99a6a2; font-size: 14px; transition: transform .16s ease, color .16s ease; }
+    .quick-prompt:hover { color: var(--accent-active); background: var(--accent-soft); border-color: #b9dcd5; }
+    .quick-prompt:hover::after { color: var(--accent); transform: translate(2px, -2px); }
+    .quick-prompt:active { background: var(--accent-soft-hover); }
+
+    .conversation {
+      flex: 1;
+      min-height: 360px;
+      padding: 32px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      background: #fcfdfd;
+    }
     .message { display: flex; gap: 12px; align-items: flex-start; }
     .message.user { justify-content: flex-end; }
-    .avatar { flex: 0 0 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; font-size: 14px; font-weight: 800; }
-    .avatar.agent { color: var(--accent-dark); background: var(--accent-soft); }
-    .avatar.user { color: #47534f; background: #e7ecea; }
-    .message-card { max-width: min(760px, 88%); padding: 16px 20px; white-space: pre-wrap; }
-    .message.user .message-card { background: var(--accent); border-color: var(--accent); color: white; }
-    .message-meta { margin-bottom: 4px; color: var(--muted); font-size: 13px; font-weight: 700; }
-    .message.user .message-meta { color: rgba(255,255,255,.75); }
-    .composer { padding: 16px; }
-    .composer textarea { display: block; width: 100%; min-height: 80px; resize: vertical; border: 1px solid var(--line); border-radius: 8px; padding: 12px 16px; color: var(--ink); background: #fbfdfc; font-size: 16px; line-height: 1.5; }
-    .composer textarea:focus { border: 2px solid var(--accent); padding: 11px 15px; outline: none; }
-    .composer-footer { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding-top: 16px; }
-    .composer-hint { color: var(--muted); font-size: 13px; }
-    .primary, .secondary, .danger { min-height: 44px; padding: 10px 20px; border-radius: 8px; font-weight: 700; transition: .15s ease; }
-    .primary { color: white; background: var(--accent); border: 1px solid var(--accent); box-shadow: var(--shadow); }
-    .primary:hover { background: var(--accent-dark); transform: translateY(-1px); }
-    .primary:disabled { opacity: .45; cursor: not-allowed; transform: none; }
-    .secondary { color: var(--accent-dark); background: white; border: 1px solid #a8d5cb; }
-    .secondary:hover { background: var(--accent-soft); }
-    .danger { color: var(--danger); background: white; border: 1px solid #efb5ae; }
-    .danger:hover { background: var(--danger-soft); }
+    .avatar {
+      flex: 0 0 36px;
+      width: 36px;
+      height: 36px;
+      display: grid;
+      place-items: center;
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: 800;
+    }
+    .avatar.agent { color: white; background: var(--accent); }
+    .avatar.user { color: var(--ink-secondary); background: var(--canvas-deep); }
+    .message-card {
+      max-width: min(720px, 84%);
+      padding: 16px 20px;
+      border: 1px solid var(--line);
+      border-radius: 4px var(--radius-md) var(--radius-md) var(--radius-md);
+      color: var(--ink-secondary);
+      background: white;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+    .message.user .message-card {
+      border-color: var(--accent);
+      border-radius: var(--radius-md) 4px var(--radius-md) var(--radius-md);
+      color: white;
+      background: var(--accent);
+    }
+    .message-meta { margin-bottom: 6px; color: var(--muted); font-size: 12px; font-weight: 750; }
+    .message.user .message-meta { color: rgba(255, 255, 255, .72); }
+
+    .composer {
+      position: sticky;
+      bottom: 0;
+      padding: 16px 24px 20px;
+      border-top: 1px solid var(--line);
+      background: rgba(255, 255, 255, .97);
+      backdrop-filter: blur(12px);
+    }
+    .composer-field {
+      position: relative;
+      border: 1px solid var(--line-strong);
+      border-radius: var(--radius-md);
+      background: white;
+      transition: border-color .16s ease, box-shadow .16s ease;
+    }
+    .composer-field:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(15, 118, 110, .10); }
+    .composer textarea {
+      display: block;
+      width: 100%;
+      min-height: 88px;
+      max-height: 220px;
+      resize: vertical;
+      padding: 16px;
+      border: 0;
+      outline: 0;
+      border-radius: inherit;
+      color: var(--ink);
+      background: transparent;
+      font-size: 16px;
+      line-height: 1.55;
+    }
+    .composer textarea::placeholder { color: #95a29f; }
+    .composer-footer {
+      min-height: 44px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      padding-top: 12px;
+    }
+    .composer-hint { color: var(--muted); font-size: 12px; }
+    .primary, .secondary, .danger {
+      min-height: 44px;
+      padding: 10px 20px;
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      font-weight: 720;
+      transition: background-color .16s ease, border-color .16s ease, color .16s ease, transform .16s ease, box-shadow .16s ease;
+    }
+    .primary {
+      min-width: 112px;
+      color: white;
+      background: var(--accent);
+      border: 1px solid var(--accent);
+    }
+    .primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); box-shadow: 0 4px 12px rgba(15, 118, 110, .20); transform: translateY(-1px); }
+    .primary:active { background: var(--accent-active); border-color: var(--accent-active); transform: translateY(0); box-shadow: none; }
+    .primary:disabled { opacity: .42; transform: none; box-shadow: none; }
+    .secondary { color: var(--accent); background: white; border: 1px solid #a9d2cb; }
+    .secondary:hover { background: var(--accent-soft); border-color: var(--accent); }
+    .secondary:active { background: var(--accent-soft-hover); }
+    .danger { color: var(--danger); background: white; border: 1px solid #e9b6b0; }
+    .danger:hover { background: var(--danger-soft); border-color: var(--danger); }
+    .primary.is-loading::before { content: ""; display: inline-block; width: 12px; height: 12px; margin-right: 8px; border: 2px solid rgba(255, 255, 255, .45); border-top-color: white; border-radius: 50%; vertical-align: -2px; animation: spin .75s linear infinite; }
 
     .inspector { display: flex; flex-direction: column; gap: 16px; }
-    .panel { padding: 20px; }
-    .panel-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
-    .panel-heading h2 { font-size: 17px; }
-    .panel-heading button { color: var(--accent); background: transparent; border: 0; padding: 4px; font-size: 13px; font-weight: 700; }
-    .metric-list { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-    .metric { padding: 12px; background: var(--canvas); border-radius: 8px; }
-    .metric strong { display: block; font-size: 20px; line-height: 1.2; }
-    .metric span { display: block; margin-top: 4px; color: var(--muted); font-size: 13px; }
-    .empty { color: var(--muted); font-size: 14px; }
-    .citation { padding: 12px 0; border-top: 1px solid var(--line); }
-    .citation:first-child { border-top: 0; padding-top: 0; }
-    .citation-title { color: var(--accent-dark); font-weight: 700; font-size: 14px; }
-    .citation p { display: -webkit-box; overflow: hidden; margin-top: 4px; color: var(--muted); font-size: 13px; line-height: 1.45; -webkit-line-clamp: 4; -webkit-box-orient: vertical; }
-    .tool-call { padding: 12px; background: #f8faf9; border-radius: 8px; margin-top: 8px; }
-    .tool-call strong { color: var(--accent-dark); font-size: 14px; }
-    .tool-call code { display: block; overflow-wrap: anywhere; margin-top: 6px; color: var(--muted); font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: 12px; }
-    .review-box { background: var(--warning-soft); border: 1px solid #f0d78b; }
-    .review-box p { color: #815c0b; font-size: 14px; }
-    .review-actions { display: flex; gap: 8px; margin-top: 16px; }
-    .review-actions button { flex: 1; min-height: 40px; padding: 8px 12px; font-size: 14px; }
-    .toast { position: fixed; right: 24px; bottom: 24px; display: none; max-width: 360px; padding: 12px 16px; border-radius: 8px; color: white; background: #24312e; box-shadow: 0 10px 15px rgba(0,0,0,.12); font-size: 14px; }
-    .toast.show { display: block; }
-
-    @media (max-width: 1160px) {
-      .layout { grid-template-columns: 208px minmax(0, 1fr); }
-      .inspector { grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 1fr 1fr; align-items: start; }
+    .panel {
+      padding: 20px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      background: var(--paper);
     }
-    @media (max-width: 760px) {
-      .shell { display: block; }
-      .topbar { height: 64px; padding: 0 16px; }
-      .brand-sub, .docs-link { display: none; }
+    .panel-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+    .panel-heading h2 { font-size: 15px; line-height: 1.4; letter-spacing: -.01em; }
+    .panel-heading button {
+      min-height: 32px;
+      padding: 4px 8px;
+      border: 0;
+      border-radius: 6px;
+      color: var(--accent);
+      background: transparent;
+      font-size: 12px;
+      font-weight: 750;
+    }
+    .panel-heading button:hover { background: var(--accent-soft); }
+    .panel-heading button:disabled { opacity: .45; }
+    .metric-list { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .metric { padding: 16px 12px; border-radius: var(--radius-sm); background: var(--canvas); }
+    .metric strong { display: block; font-size: 22px; line-height: 1.15; letter-spacing: -.025em; }
+    .metric span { display: block; margin-top: 6px; color: var(--muted); font-size: 12px; }
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      min-height: 24px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      color: var(--muted);
+      background: var(--canvas);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .03em;
+    }
+    .empty { color: var(--muted); font-size: 13px; line-height: 1.6; }
+    .citation { padding: 12px 0; border-top: 1px solid var(--line); }
+    .citation:first-child { padding-top: 0; border-top: 0; }
+    .citation:last-child { padding-bottom: 0; }
+    .citation-title { color: var(--accent-active); font-size: 13px; font-weight: 750; }
+    .citation p {
+      display: -webkit-box;
+      overflow: hidden;
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.55;
+      -webkit-line-clamp: 4;
+      -webkit-box-orient: vertical;
+    }
+    .tool-call { margin-top: 8px; padding: 12px; border-radius: var(--radius-sm); background: var(--canvas); }
+    .tool-call:first-child { margin-top: 0; }
+    .tool-call strong { color: var(--accent-active); font-size: 13px; }
+    .tool-call code { display: block; overflow-wrap: anywhere; margin-top: 6px; color: var(--muted); font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: 12px; line-height: 1.5; }
+    .review-box { border-color: #ead8a9; background: var(--warning-soft); }
+    .review-box .panel-heading { margin-bottom: 8px; }
+    .review-box .panel-heading h2 { color: var(--warning); }
+    .review-box p { color: #795b19; font-size: 13px; line-height: 1.6; }
+    .review-actions { display: flex; gap: 8px; margin-top: 16px; }
+    .review-actions button { flex: 1; min-height: 40px; padding: 8px 10px; font-size: 13px; }
+    .toast {
+      position: fixed;
+      right: 24px;
+      bottom: 24px;
+      z-index: 50;
+      max-width: 360px;
+      padding: 12px 16px;
+      border-radius: var(--radius-sm);
+      color: white;
+      background: #23302d;
+      box-shadow: var(--shadow-float);
+      font-size: 14px;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(12px);
+      transition: opacity .18s ease, transform .18s ease;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+    }
+    @media (max-width: 1240px) {
+      .layout { grid-template-columns: 208px minmax(480px, 1fr); }
+      .inspector {
+        position: static;
+        grid-column: 1 / -1;
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        align-items: start;
+      }
+      .review-box { grid-column: 1 / -1; }
+      .chat-panel { min-height: 680px; }
+    }
+    @media (max-width: 840px) {
       .layout { display: block; padding: 24px 16px 32px; }
       .sidebar { display: none; }
-      .hero { display: block; }
-      .hero-meta { margin-top: 16px; }
-      h1 { font-size: 28px; }
-      .inspector { display: flex; margin-top: 24px; }
-      .message-card { max-width: 90%; }
+      .inspector { display: grid; grid-template-columns: 1fr 1fr; margin-top: 24px; }
+      .inspector .panel:first-child { grid-column: 1 / -1; }
+      .topbar { padding: 0 16px; }
+      .account-chip, .brand-sub { display: none; }
+      .hero { padding-top: 0; }
+    }
+    @media (max-width: 600px) {
+      .shell { grid-template-rows: 64px 1fr; }
+      .brand-mark { flex-basis: 36px; width: 36px; height: 36px; }
+      .top-actions { gap: 4px; }
+      .docs-link { width: 40px; padding: 0; justify-content: center; font-size: 0; }
+      .docs-link svg { width: 18px; height: 18px; }
+      .status-pill { padding: 6px 10px; }
+      .hero { display: block; padding-bottom: 20px; }
+      .hero h1 { font-size: 28px; }
+      .hero-badge { margin-top: 16px; }
+      .chat-panel { min-height: 620px; }
+      .prompt-section, .conversation { padding-left: 16px; padding-right: 16px; }
+      .quick-prompts { grid-template-columns: 1fr; }
+      .conversation { padding-top: 24px; padding-bottom: 24px; }
+      .message-card { max-width: calc(100% - 48px); padding: 14px 16px; }
+      .avatar { flex-basis: 32px; width: 32px; height: 32px; border-radius: var(--radius-sm); }
+      .composer { padding: 16px; }
       .composer-footer { align-items: stretch; flex-direction: column; }
+      .composer-hint { text-align: center; }
       .primary { width: 100%; }
+      .inspector { display: flex; }
+      .toast { right: 16px; bottom: 16px; left: 16px; max-width: none; }
     }
   </style>
 </head>
 <body>
+  <a class="skip-link" href="#mainContent">跳至主要内容</a>
   <div class="shell">
     <header class="topbar">
       <div class="brand">
-        <div class="brand-mark">星</div>
-        <div><span class="brand-name">星河制度与报销助手</span><span class="brand-sub">Enterprise Policy Copilot</span></div>
+        <div class="brand-mark" aria-hidden="true">星</div>
+        <div class="brand-copy">
+          <span class="brand-name">星河制度与报销助手</span>
+          <span class="brand-sub">Enterprise Policy Copilot</span>
+        </div>
       </div>
       <div class="top-actions">
-        <span class="status-pill"><span class="status-dot"></span><span id="systemStatus">检查系统中</span></span>
-        <a class="docs-link" href="/docs" target="_blank" rel="noreferrer">API 文档 ↗</a>
+        <span class="status-pill" id="statusPill"><span class="status-dot"></span><span id="systemStatus">检查系统中</span></span>
+        <span class="account-chip"><span class="account-avatar">E</span><span id="currentUser">E1001</span></span>
+        <a class="docs-link" href="/docs" target="_blank" rel="noreferrer" aria-label="打开 API 文档">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path d="M14 3h7v7M10 14 21 3M21 14v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5"/></svg>
+          <span>API 文档</span>
+        </a>
       </div>
     </header>
 
-    <main class="layout">
-      <aside class="sidebar">
+    <main class="layout" id="mainContent">
+      <aside class="sidebar" aria-label="工作区导航">
         <div class="side-intro">
           <div class="eyebrow">Workspace</div>
-          <h2 style="margin-top: 8px;">企业服务台</h2>
-          <p>基于企业制度、员工数据和可审计工具调用，协助完成日常查询与报销预估。</p>
+          <h2>企业服务台</h2>
+          <p>连接制度、员工数据与审计工具，为日常咨询和报销预估提供可靠依据。</p>
         </div>
-        <nav class="nav-card" aria-label="主导航">
-          <div class="nav-item active"><span class="nav-icon">◌</span>智能问答</div>
-          <div class="nav-item"><span class="nav-icon">▤</span>制度知识库</div>
-          <div class="nav-item"><span class="nav-icon">⌁</span>运行监控</div>
-        </nav>
+        <div>
+          <div class="nav-group-label">工作台</div>
+          <nav class="nav-card" aria-label="主导航">
+            <div class="nav-item active">
+              <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M8 10h8M8 14h5"/><path d="M20 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h9a4 4 0 0 1 4 4Z"/></svg></span>
+              智能问答
+            </div>
+            <div class="nav-item">
+              <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/></svg></span>
+              制度知识库
+            </div>
+            <div class="nav-item">
+              <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 19V9M10 19V5M16 19v-7M22 19V3"/></svg></span>
+              运行监控
+            </div>
+          </nav>
+        </div>
         <div class="info-card">
-          <h3>当前能力</h3>
+          <h3>已连接能力</h3>
           <div class="capability">PostgreSQL + pgvector</div>
           <div class="capability">LangGraph 工作流</div>
           <div class="capability">MCP 工具调用</div>
@@ -202,32 +597,42 @@
           <div class="hero-copy">
             <div class="eyebrow">Policy assistant</div>
             <h1>今天有什么可以帮你？</h1>
-            <p>直接提问制度、年假余额或报销额度。我会展示依据、检索结果和工具调用过程。</p>
+            <p>查询制度、年假余额或报销额度，答案附带检索依据与完整工具调用记录。</p>
           </div>
-          <div class="hero-meta">员工账号 <strong id="currentUser">E1001</strong></div>
-        </div>
-
-        <div class="quick-prompts" aria-label="快捷问题">
-          <button class="quick-prompt" data-question="E1001还剩多少年假？">查询我的年假</button>
-          <button class="quick-prompt" data-question="我在二线城市出差，住宿花了500元，P2职级能报多少？">计算住宿报销</button>
-          <button class="quick-prompt" data-question="日常费用报销需要在多久内提交？">查看报销时限</button>
-          <button class="quick-prompt" data-question="请直接提交报销并审批通过">测试人工审核</button>
-        </div>
-
-        <div class="conversation" id="conversation">
-          <div class="message">
-            <div class="avatar agent">AI</div>
-            <div class="message-card"><div class="message-meta">制度与报销助手</div>你好，我可以帮你查询企业制度、员工年假和报销预估。涉及提交、修改或审批的操作会先进入人工审核。</div>
+          <div class="hero-badge">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path d="m9 12 2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg>
+            回答基于企业内部资料
           </div>
         </div>
 
-        <form class="panel composer" id="chatForm">
-          <textarea id="question" aria-label="输入问题" placeholder="例如：我在二线城市出差，住宿花了500元，P2职级能报多少？"></textarea>
-          <div class="composer-footer">
-            <span class="composer-hint">Enter 发送 · Shift + Enter 换行</span>
-            <button class="primary" id="sendButton" type="submit">发送问题</button>
+        <div class="chat-panel">
+          <div class="prompt-section">
+            <div class="section-label">快捷提问</div>
+            <div class="quick-prompts" aria-label="快捷问题">
+              <button class="quick-prompt" data-question="E1001还剩多少年假？">查询我的年假</button>
+              <button class="quick-prompt" data-question="我在二线城市出差，住宿花了500元，P2职级能报多少？">计算住宿报销</button>
+              <button class="quick-prompt" data-question="日常费用报销需要在多久内提交？">查看报销时限</button>
+              <button class="quick-prompt" data-question="请直接提交报销并审批通过">测试人工审核</button>
+            </div>
           </div>
-        </form>
+
+          <div class="conversation" id="conversation" aria-live="polite">
+            <div class="message">
+              <div class="avatar agent" aria-hidden="true">AI</div>
+              <div class="message-card"><div class="message-meta">制度与报销助手</div>你好，我可以帮你查询企业制度、员工年假和报销预估。涉及提交、修改或审批的操作会先进入人工审核。</div>
+            </div>
+          </div>
+
+          <form class="composer" id="chatForm">
+            <div class="composer-field">
+              <textarea id="question" aria-label="输入问题" placeholder="输入你的问题，例如：P2 职级在二线城市的住宿报销标准是多少？"></textarea>
+            </div>
+            <div class="composer-footer">
+              <span class="composer-hint">Enter 发送 · Shift + Enter 换行</span>
+              <button class="primary" id="sendButton" type="submit">发送问题</button>
+            </div>
+          </form>
+        </div>
       </section>
 
       <aside class="inspector" aria-label="运行详情">
@@ -239,11 +644,11 @@
           </div>
         </section>
         <section class="panel">
-          <div class="panel-heading"><h2>引用依据</h2><span class="tag" style="background: var(--canvas); color: var(--muted);">Top K</span></div>
-          <div id="citations"><p class="empty">完成一次提问后，这里会显示制度来源。</p></div>
+          <div class="panel-heading"><h2>引用依据</h2><span class="tag">TOP K</span></div>
+          <div id="citations"><p class="empty">完成一次提问后，这里会显示相关制度来源。</p></div>
         </section>
         <section class="panel">
-          <div class="panel-heading"><h2>工具调用</h2><span class="tag" style="background: var(--canvas); color: var(--muted);">Trace</span></div>
+          <div class="panel-heading"><h2>工具调用</h2><span class="tag">TRACE</span></div>
           <div id="toolCalls"><p class="empty">本次运行尚未调用工具。</p></div>
         </section>
         <section class="panel review-box" id="reviewPanel" hidden>
@@ -257,69 +662,149 @@
       </aside>
     </main>
   </div>
-  <div class="toast" id="toast" role="status"></div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
   <script>
     const state = { sessionId: `web-${Date.now().toString(36)}`, userId: "E1001", runId: null };
     const $ = (id) => document.getElementById(id);
 
     function showToast(message) {
-      const toast = $("toast"); toast.textContent = message; toast.classList.add("show");
-      window.clearTimeout(showToast.timer); showToast.timer = window.setTimeout(() => toast.classList.remove("show"), 3200);
+      const toast = $("toast");
+      toast.textContent = message;
+      toast.classList.add("show");
+      window.clearTimeout(showToast.timer);
+      showToast.timer = window.setTimeout(() => toast.classList.remove("show"), 3200);
     }
+
     function appendMessage(role, text, meta) {
-      const wrapper = document.createElement("div"); wrapper.className = `message ${role}`;
-      const avatar = document.createElement("div"); avatar.className = `avatar ${role}`; avatar.textContent = role === "user" ? "我" : "AI";
-      const card = document.createElement("div"); card.className = "message-card";
-      const label = document.createElement("div"); label.className = "message-meta"; label.textContent = meta || (role === "user" ? "我" : "制度与报销助手");
+      const wrapper = document.createElement("div");
+      wrapper.className = `message ${role}`;
+      const avatar = document.createElement("div");
+      avatar.className = `avatar ${role}`;
+      avatar.setAttribute("aria-hidden", "true");
+      avatar.textContent = role === "user" ? "我" : "AI";
+      const card = document.createElement("div");
+      card.className = "message-card";
+      const label = document.createElement("div");
+      label.className = "message-meta";
+      label.textContent = meta || (role === "user" ? "我" : "制度与报销助手");
       card.append(label, document.createTextNode(text));
       if (role === "user") wrapper.append(card, avatar); else wrapper.append(avatar, card);
-      $("conversation").appendChild(wrapper); wrapper.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      $("conversation").appendChild(wrapper);
+      wrapper.scrollIntoView({ behavior: "smooth", block: "nearest" });
     }
+
     function renderDetails(data) {
       state.runId = data.run_id || state.runId;
       const citations = data.citations || [];
-      $("citations").innerHTML = citations.length ? citations.slice(0, 4).map((item) => `
-        <div class="citation"><div class="citation-title">${escapeHtml(item.source)} · 第 ${item.page} 页</div><p>${escapeHtml(item.snippet || item.content || "")}</p></div>`).join("") : '<p class="empty">本次没有足够的制度依据。</p>';
+      $("citations").innerHTML = citations.length
+        ? citations.slice(0, 4).map((item) => `<div class="citation"><div class="citation-title">${escapeHtml(item.source)} · 第 ${escapeHtml(item.page)} 页</div><p>${escapeHtml(item.snippet || item.content || "")}</p></div>`).join("")
+        : '<p class="empty">本次没有足够的制度依据。</p>';
       const tools = data.tool_calls || [];
-      $("toolCalls").innerHTML = tools.length ? tools.map((item) => `<div class="tool-call"><strong>${escapeHtml(item.name)}</strong><code>${escapeHtml(JSON.stringify(item.arguments || {}))}</code></div>`).join("") : '<p class="empty">本次运行未调用工具。</p>';
+      $("toolCalls").innerHTML = tools.length
+        ? tools.map((item) => `<div class="tool-call"><strong>${escapeHtml(item.name)}</strong><code>${escapeHtml(JSON.stringify(item.arguments || {}))}</code></div>`).join("")
+        : '<p class="empty">本次运行未调用工具。</p>';
       $("reviewPanel").hidden = data.status !== "awaiting_human_review";
     }
-    function escapeHtml(value) { return String(value).replace(/[&<>'"]/g, (ch) => ({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;","\"":"&quot;"}[ch])); }
+
+    function escapeHtml(value) {
+      return String(value).replace(/[&<>'"]/g, (ch) => ({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;","\"":"&quot;"}[ch]));
+    }
 
     async function loadHealth() {
       try {
-        const response = await fetch("/healthz"); const data = await response.json();
+        const response = await fetch("/healthz");
+        const data = await response.json();
         $("systemStatus").textContent = data.status === "ok" ? "系统在线" : "系统异常";
+        $("statusPill").classList.toggle("error", data.status !== "ok");
         $("chunkCount").textContent = data.indexed_chunks ?? "—";
         $("backendName").textContent = data.storage_backend === "postgres" ? "pgvector" : "本地模式";
-      } catch (error) { $("systemStatus").textContent = "连接失败"; showToast("无法连接后端，请确认服务已启动"); }
+      } catch (error) {
+        $("systemStatus").textContent = "连接失败";
+        $("statusPill").classList.add("error");
+        showToast("无法连接后端，请确认服务已启动");
+      }
     }
+
     async function sendQuestion(question) {
-      const text = question.trim(); if (!text) return;
-      const button = $("sendButton"); button.disabled = true; button.textContent = "处理中…";
-      appendMessage("user", text); $("question").value = "";
+      const text = question.trim();
+      if (!text) return;
+      const button = $("sendButton");
+      button.disabled = true;
+      button.classList.add("is-loading");
+      button.textContent = "处理中";
+      appendMessage("user", text);
+      $("question").value = "";
       try {
-        const response = await fetch("/v1/chat", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ session_id: state.sessionId, user_id: state.userId, message: text }) });
-        const data = await response.json(); if (!response.ok) throw new Error(data.detail || "请求失败");
-        appendMessage("agent", data.answer || "暂时没有生成答案。", data.status === "awaiting_human_review" ? "等待人工审核" : "制度与报销助手"); renderDetails(data);
-      } catch (error) { appendMessage("agent", `请求未完成：${error.message}`, "系统提示"); showToast(error.message); }
-      finally { button.disabled = false; button.textContent = "发送问题"; }
+        const response = await fetch("/v1/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ session_id: state.sessionId, user_id: state.userId, message: text })
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.detail || "请求失败");
+        appendMessage("agent", data.answer || "暂时没有生成答案。", data.status === "awaiting_human_review" ? "等待人工审核" : "制度与报销助手");
+        renderDetails(data);
+      } catch (error) {
+        appendMessage("agent", `请求未完成：${error.message}`, "系统提示");
+        showToast(error.message);
+      } finally {
+        button.disabled = false;
+        button.classList.remove("is-loading");
+        button.textContent = "发送问题";
+      }
     }
+
     async function review(approved) {
       if (!state.runId) return;
       try {
-        const response = await fetch(`/v1/runs/${state.runId}/approve`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ approved }) });
-        const data = await response.json(); if (!response.ok) throw new Error(data.detail || "审核失败");
-        appendMessage("agent", data.answer || (approved ? "人工审核已通过。" : "人工审核未通过。"), approved ? "审核结果" : "审核结果"); renderDetails(data);
-      } catch (error) { showToast(error.message); }
+        const response = await fetch(`/v1/runs/${state.runId}/approve`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ approved })
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.detail || "审核失败");
+        appendMessage("agent", data.answer || (approved ? "人工审核已通过。" : "人工审核未通过。"), "审核结果");
+        renderDetails(data);
+      } catch (error) {
+        showToast(error.message);
+      }
     }
-    $("chatForm").addEventListener("submit", (event) => { event.preventDefault(); sendQuestion($("question").value); });
-    $("question").addEventListener("keydown", (event) => { if (event.key === "Enter" && !event.shiftKey) { event.preventDefault(); $("chatForm").requestSubmit(); } });
-    document.querySelectorAll(".quick-prompt").forEach((button) => button.addEventListener("click", () => { $("question").value = button.dataset.question; $("question").focus(); }));
+
+    $("chatForm").addEventListener("submit", (event) => {
+      event.preventDefault();
+      sendQuestion($("question").value);
+    });
+    $("question").addEventListener("keydown", (event) => {
+      if (event.key === "Enter" && !event.shiftKey) {
+        event.preventDefault();
+        $("chatForm").requestSubmit();
+      }
+    });
+    document.querySelectorAll(".quick-prompt").forEach((button) => button.addEventListener("click", () => {
+      $("question").value = button.dataset.question;
+      $("question").focus();
+    }));
     $("approveButton").addEventListener("click", () => review(true));
     $("rejectButton").addEventListener("click", () => review(false));
-    $("reindexButton").addEventListener("click", async () => { const button = $("reindexButton"); button.disabled = true; button.textContent = "索引中…"; try { const response = await fetch("/v1/documents/reindex", { method: "POST" }); const data = await response.json(); $("chunkCount").textContent = data.indexed_chunks; showToast(`已完成索引：${data.indexed_chunks} 个片段`); } catch (error) { showToast("重新索引失败"); } finally { button.disabled = false; button.textContent = "重新索引"; } });
+    $("reindexButton").addEventListener("click", async () => {
+      const button = $("reindexButton");
+      button.disabled = true;
+      button.textContent = "索引中…";
+      try {
+        const response = await fetch("/v1/documents/reindex", { method: "POST" });
+        const data = await response.json();
+        $("chunkCount").textContent = data.indexed_chunks;
+        showToast(`已完成索引：${data.indexed_chunks} 个片段`);
+      } catch (error) {
+        showToast("重新索引失败");
+      } finally {
+        button.disabled = false;
+        button.textContent = "重新索引";
+      }
+    });
+
     loadHealth();
   </script>
 </body>
